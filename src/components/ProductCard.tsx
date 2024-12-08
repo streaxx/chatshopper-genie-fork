@@ -15,13 +15,11 @@ const ProductCard = ({ image, name, price, rating, description, onSelect }: Prod
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast.success('Added to cart!');
-    console.log('Added to cart');
   };
 
   const handleAddToWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast.success('Added to wishlist!');
-    console.log('Added to wishlist');
   };
 
   return (
