@@ -48,9 +48,9 @@ const ChatInterface = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50/80 via-white/40 to-blue-50/80">
       {/* Chat Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent via-white/10 to-white/20 backdrop-blur-sm">
         {/* Example AI Message */}
         <div className="flex items-start space-x-2 animate-fade-in">
           <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-white/50 max-w-[80%]">
