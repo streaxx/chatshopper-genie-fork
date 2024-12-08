@@ -3,6 +3,13 @@ import { Send, Mic, History, Bell, Heart, HelpCircle, Wallet, Receipt, Package, 
 import ProductCard from './ProductCard';
 import ProductOverlay from './ProductOverlay';
 import { toast } from 'sonner';
+import SidePanel from './SidePanel';
+import HistoryPanel from './panels/HistoryPanel';
+import NotificationsPanel from './panels/NotificationsPanel';
+import WishlistPanel from './panels/WishlistPanel';
+import HelpPanel from './panels/HelpPanel';
+import WalletPanel from './panels/WalletPanel';
+import OrderStatusPanel from './panels/OrderStatusPanel';
 
 const sampleProducts = [
   {
@@ -50,49 +57,45 @@ const sampleProducts = [
 interface MenuItem {
   icon: React.ReactNode;
   label: string;
-  action: () => void;
+  panel: React.ReactNode;
 }
 
 const ChatInterface = () => {
   const [message, setMessage] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activePanelIndex, setActivePanelIndex] = useState<number | null>(null);
 
   const menuItems: MenuItem[] = [
     { 
       icon: <History className="w-5 h-5" />, 
       label: "History",
-      action: () => toast.info("Viewing history")
+      panel: <HistoryPanel />
     },
     { 
       icon: <Bell className="w-5 h-5" />, 
       label: "Notifications",
-      action: () => toast.info("Checking notifications")
+      panel: <NotificationsPanel />
     },
     { 
       icon: <Heart className="w-5 h-5" />, 
       label: "Wishlist",
-      action: () => toast.info("Opening wishlist")
+      panel: <WishlistPanel />
     },
     { 
       icon: <HelpCircle className="w-5 h-5" />, 
       label: "Help",
-      action: () => toast.info("Getting help")
+      panel: <HelpPanel />
     },
     { 
       icon: <Wallet className="w-5 h-5" />, 
       label: "Wallet",
-      action: () => toast.info("Checking wallet")
-    },
-    { 
-      icon: <Receipt className="w-5 h-5" />, 
-      label: "Transactions",
-      action: () => toast.info("Viewing transactions")
+      panel: <WalletPanel />
     },
     { 
       icon: <Package className="w-5 h-5" />, 
       label: "Order Status",
-      action: () => toast.info("Checking order status")
+      panel: <OrderStatusPanel />
     }
   ];
 
@@ -125,7 +128,7 @@ const ChatInterface = () => {
               <button
                 key={index}
                 onClick={() => {
-                  item.action();
+                  setActivePanelIndex(index);
                   setIsMenuOpen(false);
                 }}
                 className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors"
@@ -136,6 +139,17 @@ const ChatInterface = () => {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Side Panel */}
+      {activePanelIndex !== null && (
+        <SidePanel
+          isOpen={activePanelIndex !== null}
+          onClose={() => setActivePanelIndex(null)}
+          title={menuItems[activePanelIndex].label}
+        >
+          {menuItems[activePanelIndex].panel}
+        </SidePanel>
       )}
 
       {/* Chat Messages Area */}
