@@ -9,9 +9,10 @@ interface ProductCardProps {
   rating: number;
   description: string;
   onSelect: () => void;
+  onBuy: () => void;
 }
 
-const ProductCard = ({ image, name, price, rating, description, onSelect }: ProductCardProps) => {
+const ProductCard = ({ image, name, price, rating, description, onSelect, onBuy }: ProductCardProps) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast.success('Added to cart!');
@@ -20,6 +21,11 @@ const ProductCard = ({ image, name, price, rating, description, onSelect }: Prod
   const handleAddToWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast.success('Added to wishlist!');
+  };
+
+  const handleBuy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onBuy();
   };
 
   return (
@@ -52,13 +58,20 @@ const ProductCard = ({ image, name, price, rating, description, onSelect }: Prod
         
         <div className="flex items-center justify-between pt-2">
           <span className="font-bold text-lg text-gray-800">${price.toFixed(2)}</span>
-          <button 
-            className="flex items-center space-x-1 px-3 py-1.5 bg-accent/80 text-white rounded-full text-sm hover:bg-accent transition-colors backdrop-blur-sm"
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart size={16} />
-            <span>Add to Cart</span>
-          </button>
+          <div className="flex gap-2">
+            <button 
+              className="flex items-center space-x-1 px-3 py-1.5 bg-primary/80 text-white rounded-full text-sm hover:bg-primary transition-colors backdrop-blur-sm"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart size={16} />
+            </button>
+            <button 
+              className="flex items-center space-x-1 px-3 py-1.5 bg-accent/80 text-white rounded-full text-sm hover:bg-accent transition-colors backdrop-blur-sm"
+              onClick={handleBuy}
+            >
+              Buy Now
+            </button>
+          </div>
         </div>
       </div>
     </div>

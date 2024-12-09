@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Mic, History, Bell, Heart, HelpCircle, Wallet, Receipt, Package, Menu, X } from 'lucide-react';
+import { Send, Mic, History, Bell, Heart, HelpCircle, Wallet, Receipt, Package, Menu, X, ArrowLeft } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ProductOverlay from './ProductOverlay';
 import { toast } from 'sonner';
@@ -10,6 +10,9 @@ import WishlistPanel from './panels/WishlistPanel';
 import HelpPanel from './panels/HelpPanel';
 import WalletPanel from './panels/WalletPanel';
 import OrderStatusPanel from './panels/OrderStatusPanel';
+import OrderProcessing from './OrderProcessing';
+import ChatMessage from './ChatMessage';
+import WalletBalance from './WalletBalance';
 
 const sampleProducts = [
   {
@@ -65,42 +68,26 @@ const ChatInterface = () => {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activePanelIndex, setActivePanelIndex] = useState<number | null>(null);
+  const [processingOrder, setProcessingOrder] = useState<any>(null);
+  const [walletBalance] = useState(1000); // Mock initial balance
+  const [messages, setMessages] = useState<Array<{ isUser: boolean; content: React.ReactNode }>>([
+    { isUser: false, content: "Welcome! I'm your shopping assistant. What are you looking for today?" }
+  ]);
 
   const menuItems: MenuItem[] = [
-    { 
-      icon: <History className="w-5 h-5" />, 
-      label: "History",
-      panel: <HistoryPanel />
-    },
-    { 
-      icon: <Bell className="w-5 h-5" />, 
-      label: "Notifications",
-      panel: <NotificationsPanel />
-    },
-    { 
-      icon: <Heart className="w-5 h-5" />, 
-      label: "Wishlist",
-      panel: <WishlistPanel />
-    },
-    { 
-      icon: <HelpCircle className="w-5 h-5" />, 
-      label: "Help",
-      panel: <HelpPanel />
-    },
-    { 
-      icon: <Wallet className="w-5 h-5" />, 
-      label: "Wallet",
-      panel: <WalletPanel />
-    },
-    { 
-      icon: <Package className="w-5 h-5" />, 
-      label: "Order Status",
-      panel: <OrderStatusPanel />
-    }
+    { icon: <History className="w-5 h-5" />, label: "History", panel: <HistoryPanel /> },
+    { icon: <Bell className="w-5 h-5" />, label: "Notifications", panel: <NotificationsPanel /> },
+    { icon: <Heart className="w-5 h-5" />, label: "Wishlist", panel: <WishlistPanel /> },
+    { icon: <HelpCircle className="w-5 h-5" />, label: "Help", panel: <HelpPanel /> },
+    { icon: <Wallet className="w-5 h-5" />, label: "Wallet", panel: <WalletPanel /> },
+    { icon: <Package className="w-5 h-5" />, label: "Order Status", panel: <OrderStatusPanel /> }
   ];
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!message.trim()) return;
+    
+    setMessages(prev => [...prev, { isUser: true, content: message }]);
     console.log('Sending message:', message);
     
     if (message.toLowerCase().includes('buy')) {
@@ -110,15 +97,35 @@ const ChatInterface = () => {
     setMessage('');
   };
 
+  const handleBuy = (product: any) => {
+    setProcessingOrder(product);
+    setMessages(prev => [...prev, {
+      isUser: false,
+      content: <OrderProcessing
+        product={product}
+        onComplete={() => {
+          setProcessingOrder(null);
+          toast.success('Order completed successfully!');
+        }}
+      />
+    }]);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50/80 via-white/40 to-blue-50/80">
-      {/* Floating Menu Button */}
-      <button
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="fixed top-4 right-4 z-50 p-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-white/50"
-      >
-        {isMenuOpen ? <X className="w-6 h-6 text-gray-700" /> : <Menu className="w-6 h-6 text-gray-700" />}
-      </button>
+      {/* Top Bar */}
+      <div className="flex items-center justify-between p-4">
+        <WalletBalance
+          balance={walletBalance}
+          onClick={() => setActivePanelIndex(4)} // Index of Wallet in menuItems
+        />
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="p-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-white/50"
+        >
+          {isMenuOpen ? <X className="w-6 h-6 text-gray-700" /> : <Menu className="w-6 h-6 text-gray-700" />}
+        </button>
+      </div>
 
       {/* Floating Menu */}
       {isMenuOpen && (
@@ -147,6 +154,10 @@ const ChatInterface = () => {
           isOpen={activePanelIndex !== null}
           onClose={() => setActivePanelIndex(null)}
           title={menuItems[activePanelIndex].label}
+          onBack={() => {
+            setActivePanelIndex(null);
+            setIsMenuOpen(true);
+          }}
         >
           {menuItems[activePanelIndex].panel}
         </SidePanel>
@@ -154,12 +165,11 @@ const ChatInterface = () => {
 
       {/* Chat Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent via-white/10 to-white/20 backdrop-blur-sm">
-        {/* Welcome Message */}
-        <div className="flex items-start space-x-2 animate-fade-in">
-          <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-white/50 max-w-[80%]">
-            <p className="text-gray-800">Welcome! I'm your shopping assistant. What are you looking for today?</p>
-          </div>
-        </div>
+        {messages.map((msg, index) => (
+          <ChatMessage key={index} isUser={msg.isUser}>
+            {msg.content}
+          </ChatMessage>
+        ))}
 
         {/* Product Cards */}
         <div className="flex overflow-x-auto space-x-4 p-2 pb-4 scrollbar-hide">
@@ -172,6 +182,7 @@ const ChatInterface = () => {
               rating={product.rating}
               description={product.description}
               onSelect={() => setSelectedProduct(product)}
+              onBuy={() => handleBuy(product)}
             />
           ))}
         </div>
@@ -210,6 +221,7 @@ const ChatInterface = () => {
         <ProductOverlay
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
+          onBuy={() => handleBuy(selectedProduct)}
         />
       )}
     </div>
