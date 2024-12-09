@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Send, Mic, History, Bell, Heart, HelpCircle, Wallet, Receipt, Package, Menu, X, ArrowLeft } from 'lucide-react';
-import ProductCard from './ProductCard';
+import { Send, Mic, History, Bell, Heart, HelpCircle, Wallet, Receipt, Package, Menu, X } from 'lucide-react';
+import ProductList from './ProductList';
 import ProductOverlay from './ProductOverlay';
 import { toast } from 'sonner';
 import SidePanel from './SidePanel';
@@ -70,8 +70,8 @@ const ChatInterface = () => {
   const [activePanelIndex, setActivePanelIndex] = useState<number | null>(null);
   const [processingOrder, setProcessingOrder] = useState<any>(null);
   const [walletBalance, setWalletBalance] = useState(1000);
-  const [messages, setMessages] = useState<Array<{ isUser: boolean; content: React.ReactNode }>>([
-    { isUser: false, content: "Welcome! I'm your shopping assistant. What are you looking for today?" }
+  const [messages, setMessages] = useState<Array<{ isUser: boolean; content: React.ReactNode; timestamp: number }>>([
+    { isUser: false, content: "Welcome! I'm your shopping assistant. What are you looking for today?", timestamp: Date.now() }
   ]);
 
   const menuItems: MenuItem[] = [
@@ -87,11 +87,25 @@ const ChatInterface = () => {
     e.preventDefault();
     if (!message.trim()) return;
     
-    setMessages(prev => [...prev, { isUser: true, content: message }]);
-    console.log('Sending message:', message);
+    const timestamp = Date.now();
+    setMessages(prev => [...prev, { isUser: true, content: message, timestamp }]);
     
     if (message.toLowerCase().includes('buy')) {
       toast.success('Here are some products you might like!');
+      setMessages(prev => [
+        ...prev,
+        {
+          isUser: false,
+          content: (
+            <ProductList
+              products={sampleProducts}
+              onSelectProduct={setSelectedProduct}
+              onBuyProduct={handleBuy}
+            />
+          ),
+          timestamp: timestamp + 1
+        }
+      ]);
     }
     
     setMessage('');
@@ -99,18 +113,25 @@ const ChatInterface = () => {
 
   const handleBuy = (product: any) => {
     setProcessingOrder(product);
+    const timestamp = Date.now();
     setMessages(prev => [...prev, {
       isUser: false,
-      content: <OrderProcessing
-        product={product}
-        onComplete={() => {
-          setProcessingOrder(null);
-          setWalletBalance(prev => prev - product.price);
-          toast.success('Order completed successfully!');
-        }}
-      />
+      content: (
+        <OrderProcessing
+          product={product}
+          onComplete={() => {
+            setProcessingOrder(null);
+            setWalletBalance(prev => prev - product.price);
+            toast.success('Order completed successfully!');
+          }}
+        />
+      ),
+      timestamp
     }]);
   };
+
+  // Sort messages by timestamp to ensure correct order
+  const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp);
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50/80 via-white/40 to-blue-50/80">
@@ -166,29 +187,11 @@ const ChatInterface = () => {
 
       {/* Chat Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent via-white/10 to-white/20 backdrop-blur-sm">
-        {messages.map((msg, index) => (
+        {sortedMessages.map((msg, index) => (
           <ChatMessage key={index} isUser={msg.isUser}>
             {msg.content}
           </ChatMessage>
         ))}
-
-        {/* Product Cards */}
-        {messages.some(msg => msg.content?.toString().toLowerCase().includes('buy')) && (
-          <div className="flex overflow-x-auto space-x-4 p-2 pb-4 scrollbar-hide">
-            {sampleProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                image={product.image}
-                name={product.name}
-                price={product.price}
-                rating={product.rating}
-                description={product.description}
-                onSelect={() => setSelectedProduct(product)}
-                onBuy={() => handleBuy(product)}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Input Area */}
