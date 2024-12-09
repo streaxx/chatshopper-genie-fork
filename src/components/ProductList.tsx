@@ -18,19 +18,22 @@ interface ProductListProps {
 
 const ProductList = ({ products, onSelectProduct, onBuyProduct }: ProductListProps) => {
   return (
-    <div className="flex overflow-x-auto space-x-4 p-2 pb-4 scrollbar-hide">
-      {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          image={product.image}
-          name={product.name}
-          price={product.price}
-          rating={product.rating}
-          description={product.description}
-          onSelect={() => onSelectProduct(product)}
-          onBuy={() => onBuyProduct(product)}
-        />
-      ))}
+    <div className="w-full -mx-4 px-4 py-2">
+      <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide min-w-full">
+        {products.map((product) => (
+          <div key={product.id} className="snap-start flex-none w-72 first:ml-0 last:mr-0">
+            <ProductCard
+              image={product.image}
+              name={product.name}
+              price={product.price}
+              rating={product.rating}
+              description={product.description}
+              onSelect={() => onSelectProduct(product)}
+              onBuy={() => onBuyProduct(product)}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
