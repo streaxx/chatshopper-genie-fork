@@ -69,7 +69,7 @@ const ChatInterface = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activePanelIndex, setActivePanelIndex] = useState<number | null>(null);
   const [processingOrder, setProcessingOrder] = useState<any>(null);
-  const [walletBalance] = useState(1000); // Mock initial balance
+  const [walletBalance, setWalletBalance] = useState(1000);
   const [messages, setMessages] = useState<Array<{ isUser: boolean; content: React.ReactNode }>>([
     { isUser: false, content: "Welcome! I'm your shopping assistant. What are you looking for today?" }
   ]);
@@ -105,6 +105,7 @@ const ChatInterface = () => {
         product={product}
         onComplete={() => {
           setProcessingOrder(null);
+          setWalletBalance(prev => prev - product.price);
           toast.success('Order completed successfully!');
         }}
       />
@@ -117,7 +118,7 @@ const ChatInterface = () => {
       <div className="flex items-center justify-between p-4">
         <WalletBalance
           balance={walletBalance}
-          onClick={() => setActivePanelIndex(4)} // Index of Wallet in menuItems
+          onClick={() => setActivePanelIndex(4)}
         />
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -172,20 +173,22 @@ const ChatInterface = () => {
         ))}
 
         {/* Product Cards */}
-        <div className="flex overflow-x-auto space-x-4 p-2 pb-4 scrollbar-hide">
-          {sampleProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              image={product.image}
-              name={product.name}
-              price={product.price}
-              rating={product.rating}
-              description={product.description}
-              onSelect={() => setSelectedProduct(product)}
-              onBuy={() => handleBuy(product)}
-            />
-          ))}
-        </div>
+        {messages.some(msg => msg.content?.toString().toLowerCase().includes('buy')) && (
+          <div className="flex overflow-x-auto space-x-4 p-2 pb-4 scrollbar-hide">
+            {sampleProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                image={product.image}
+                name={product.name}
+                price={product.price}
+                rating={product.rating}
+                description={product.description}
+                onSelect={() => setSelectedProduct(product)}
+                onBuy={() => handleBuy(product)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Input Area */}
