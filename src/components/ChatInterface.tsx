@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Mic, History, Bell, Heart, HelpCircle, User, Receipt, Package, Menu, X } from 'lucide-react';
+import { Send, Mic, History, Bell, Heart, HelpCircle, User, Receipt, Package, Menu, X, Wallet } from 'lucide-react';
 import ProductList from './ProductList';
 import ProductOverlay from './ProductOverlay';
 import { toast } from 'sonner';
@@ -141,13 +141,22 @@ const ChatInterface = () => {
   const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp);
 
   const handleWalletClick = () => {
-    const walletPanel = {
-      icon: <History className="w-5 h-5" />,
-      label: "Wallet",
-      panel: <WalletPanel />
-    };
-    setActivePanelIndex(menuItems.length); // Set to a new index
-    menuItems.push(walletPanel); // Temporarily add wallet panel
+    const walletPanelIndex = menuItems.findIndex(item => item.label === "Wallet");
+    if (walletPanelIndex === -1) {
+      // If wallet panel is not in menuItems, add it temporarily
+      const walletPanel = {
+        icon: <Wallet className="w-5 h-5" />,
+        label: "Wallet",
+        panel: <WalletPanel />,
+        position: 'top' as const
+      };
+      menuItems.push(walletPanel);
+      setActivePanelIndex(menuItems.length - 1);
+    } else {
+      // If wallet panel exists, just show it
+      setActivePanelIndex(walletPanelIndex);
+    }
+    console.log('Wallet clicked, panel index:', menuItems.length - 1);
   };
 
   return (

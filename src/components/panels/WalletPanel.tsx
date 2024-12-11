@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Wallet, CreditCard, History, Plus } from 'lucide-react';
+import { Wallet, History, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
@@ -78,6 +79,9 @@ const WalletPanel = () => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Add Funds to Wallet</DialogTitle>
+            <DialogDescription>
+              Choose an amount and payment method to add funds to your wallet.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
             <div className="space-y-4">
