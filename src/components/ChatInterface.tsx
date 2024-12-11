@@ -15,54 +15,6 @@ import ChatMessage from './ChatMessage';
 import WalletBalance from './WalletBalance';
 import WalletPanel from './panels/WalletPanel';
 
-const sampleProducts = [
-  {
-    id: 1,
-    name: "Premium Laptop",
-    price: 999.99,
-    rating: 4.5,
-    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    description: "High-performance laptop with the latest tech specs. Features include a powerful processor, ample storage, and stunning display.",
-    availability: 'in-stock' as const
-  },
-  {
-    id: 2,
-    name: "Wireless Headphones",
-    price: 199.99,
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
-    description: "Premium noise-canceling headphones with exceptional sound quality and comfort.",
-    availability: 'low-stock' as const
-  },
-  {
-    id: 3,
-    name: "Smart Watch",
-    price: 299.99,
-    rating: 4.3,
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
-    description: "Advanced fitness and health tracking with smart notifications and long battery life.",
-    availability: 'out-of-stock' as const
-  },
-  {
-    id: 4,
-    name: "Wireless Earbuds",
-    price: 159.99,
-    rating: 4.6,
-    image: "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb",
-    description: "True wireless earbuds with premium sound quality and active noise cancellation.",
-    availability: 'in-stock' as const
-  },
-  {
-    id: 5,
-    name: "Digital Camera",
-    price: 699.99,
-    rating: 4.7,
-    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32",
-    description: "Professional-grade digital camera with advanced features for stunning photography.",
-    availability: 'in-stock' as const
-  }
-];
-
 interface MenuItem {
   icon: React.ReactNode;
   label: string;
@@ -81,14 +33,16 @@ const ChatInterface = () => {
     { isUser: false, content: "Welcome! I'm your shopping assistant. What are you looking for today?", timestamp: Date.now() }
   ]);
 
-  const menuItems: MenuItem[] = [
+  // Store menuItems in state so we can update it
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([
     { icon: <History className="w-5 h-5" />, label: "History", panel: <HistoryPanel />, position: 'top' },
     { icon: <Bell className="w-5 h-5" />, label: "Notifications", panel: <NotificationsPanel />, position: 'top' },
     { icon: <Heart className="w-5 h-5" />, label: "Wishlist", panel: <WishlistPanel />, position: 'top' },
     { icon: <HelpCircle className="w-5 h-5" />, label: "Help", panel: <HelpPanel />, position: 'top' },
     { icon: <Package className="w-5 h-5" />, label: "Order Status", panel: <OrderStatusPanel />, position: 'top' },
-    { icon: <User className="w-5 h-5" />, label: "Account", panel: <AccountPanel />, position: 'bottom' }
-  ];
+    { icon: <User className="w-5 h-5" />, label: "Account", panel: <AccountPanel />, position: 'bottom' },
+    { icon: <Wallet className="w-5 h-5" />, label: "Wallet", panel: <WalletPanel />, position: 'top' }
+  ]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,21 +96,9 @@ const ChatInterface = () => {
 
   const handleWalletClick = () => {
     const walletPanelIndex = menuItems.findIndex(item => item.label === "Wallet");
-    if (walletPanelIndex === -1) {
-      // If wallet panel is not in menuItems, add it temporarily
-      const walletPanel = {
-        icon: <Wallet className="w-5 h-5" />,
-        label: "Wallet",
-        panel: <WalletPanel />,
-        position: 'top' as const
-      };
-      menuItems.push(walletPanel);
-      setActivePanelIndex(menuItems.length - 1);
-    } else {
-      // If wallet panel exists, just show it
-      setActivePanelIndex(walletPanelIndex);
-    }
-    console.log('Wallet clicked, panel index:', menuItems.length - 1);
+    setActivePanelIndex(walletPanelIndex);
+    setIsMenuOpen(false);
+    console.log('Wallet clicked, panel index:', walletPanelIndex);
   };
 
   return (
@@ -212,7 +154,7 @@ const ChatInterface = () => {
       )}
 
       {/* Side Panel */}
-      {activePanelIndex !== null && (
+      {activePanelIndex !== null && menuItems[activePanelIndex] && (
         <SidePanel
           isOpen={activePanelIndex !== null}
           onClose={() => setActivePanelIndex(null)}
