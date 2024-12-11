@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Mic, History, Bell, Heart, HelpCircle, Wallet, Receipt, Package, Menu, X } from 'lucide-react';
+import { Send, Mic, History, Bell, Heart, HelpCircle, User, Receipt, Package, Menu, X } from 'lucide-react';
 import ProductList from './ProductList';
 import ProductOverlay from './ProductOverlay';
 import { toast } from 'sonner';
@@ -8,7 +8,7 @@ import HistoryPanel from './panels/HistoryPanel';
 import NotificationsPanel from './panels/NotificationsPanel';
 import WishlistPanel from './panels/WishlistPanel';
 import HelpPanel from './panels/HelpPanel';
-import WalletPanel from './panels/WalletPanel';
+import AccountPanel from './panels/AccountPanel';
 import OrderStatusPanel from './panels/OrderStatusPanel';
 import OrderProcessing from './OrderProcessing';
 import ChatMessage from './ChatMessage';
@@ -61,6 +61,7 @@ interface MenuItem {
   icon: React.ReactNode;
   label: string;
   panel: React.ReactNode;
+  position?: 'top' | 'bottom';
 }
 
 const ChatInterface = () => {
@@ -75,12 +76,12 @@ const ChatInterface = () => {
   ]);
 
   const menuItems: MenuItem[] = [
-    { icon: <History className="w-5 h-5" />, label: "History", panel: <HistoryPanel /> },
-    { icon: <Bell className="w-5 h-5" />, label: "Notifications", panel: <NotificationsPanel /> },
-    { icon: <Heart className="w-5 h-5" />, label: "Wishlist", panel: <WishlistPanel /> },
-    { icon: <HelpCircle className="w-5 h-5" />, label: "Help", panel: <HelpPanel /> },
-    { icon: <Wallet className="w-5 h-5" />, label: "Wallet", panel: <WalletPanel /> },
-    { icon: <Package className="w-5 h-5" />, label: "Order Status", panel: <OrderStatusPanel /> }
+    { icon: <History className="w-5 h-5" />, label: "History", panel: <HistoryPanel />, position: 'top' },
+    { icon: <Bell className="w-5 h-5" />, label: "Notifications", panel: <NotificationsPanel />, position: 'top' },
+    { icon: <Heart className="w-5 h-5" />, label: "Wishlist", panel: <WishlistPanel />, position: 'top' },
+    { icon: <HelpCircle className="w-5 h-5" />, label: "Help", panel: <HelpPanel />, position: 'top' },
+    { icon: <Package className="w-5 h-5" />, label: "Order Status", panel: <OrderStatusPanel />, position: 'top' },
+    { icon: <User className="w-5 h-5" />, label: "Account", panel: <AccountPanel />, position: 'bottom' }
   ];
 
   const handleSend = (e: React.FormEvent) => {
@@ -139,7 +140,10 @@ const ChatInterface = () => {
       <div className="flex items-center justify-between p-4">
         <WalletBalance
           balance={walletBalance}
-          onClick={() => setActivePanelIndex(4)}
+          onClick={() => {
+            const accountIndex = menuItems.findIndex(item => item.label === 'Account');
+            setActivePanelIndex(accountIndex);
+          }}
         />
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -153,11 +157,27 @@ const ChatInterface = () => {
       {isMenuOpen && (
         <div className="fixed top-20 right-4 z-50 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/50 p-2 animate-fade-in">
           <div className="flex flex-col space-y-1">
-            {menuItems.map((item, index) => (
+            <div className="space-y-1">
+              {menuItems.filter(item => item.position !== 'bottom').map((item, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setActivePanelIndex(index);
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors"
+                >
+                  {item.icon}
+                  <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                </button>
+              ))}
+            </div>
+            <div className="border-t border-gray-200 my-2"></div>
+            {menuItems.filter(item => item.position === 'bottom').map((item, index) => (
               <button
                 key={index}
                 onClick={() => {
-                  setActivePanelIndex(index);
+                  setActivePanelIndex(menuItems.length - 1);
                   setIsMenuOpen(false);
                 }}
                 className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors"
