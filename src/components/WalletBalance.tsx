@@ -10,9 +10,9 @@ const WalletBalance = ({ balance, onClick }: WalletBalanceProps) => {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-lg border border-white/50 hover:bg-white/90 transition-colors"
+      className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-lg border border-white/50 hover:bg-white/90 transition-colors shadow-lg hover:shadow-xl"
     >
-      <Wallet className="w-4 h-4" />
+      <Wallet className="w-4 h-4 text-primary" />
       <span className="font-medium">${balance.toFixed(2)}</span>
     </button>
   );

@@ -13,6 +13,7 @@ import OrderStatusPanel from './panels/OrderStatusPanel';
 import OrderProcessing from './OrderProcessing';
 import ChatMessage from './ChatMessage';
 import WalletBalance from './WalletBalance';
+import WalletPanel from './panels/WalletPanel';
 
 const sampleProducts = [
   {
@@ -134,16 +135,23 @@ const ChatInterface = () => {
   // Sort messages by timestamp to ensure correct order
   const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp);
 
+  const handleWalletClick = () => {
+    const walletPanel = {
+      icon: <History className="w-5 h-5" />,
+      label: "Wallet",
+      panel: <WalletPanel />
+    };
+    setActivePanelIndex(menuItems.length); // Set to a new index
+    menuItems.push(walletPanel); // Temporarily add wallet panel
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50/80 via-white/40 to-blue-50/80">
       {/* Top Bar */}
       <div className="flex items-center justify-between p-4">
         <WalletBalance
           balance={walletBalance}
-          onClick={() => {
-            const accountIndex = menuItems.findIndex(item => item.label === 'Account');
-            setActivePanelIndex(accountIndex);
-          }}
+          onClick={handleWalletClick}
         />
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -153,7 +161,6 @@ const ChatInterface = () => {
         </button>
       </div>
 
-      {/* Floating Menu */}
       {isMenuOpen && (
         <div className="fixed top-20 right-4 z-50 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/50 p-2 animate-fade-in">
           <div className="flex flex-col space-y-1">
