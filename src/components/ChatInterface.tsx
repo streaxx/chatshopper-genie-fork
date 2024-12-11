@@ -22,7 +22,8 @@ const sampleProducts = [
     price: 999.99,
     rating: 4.5,
     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    description: "High-performance laptop with the latest tech specs. Features include a powerful processor, ample storage, and stunning display."
+    description: "High-performance laptop with the latest tech specs. Features include a powerful processor, ample storage, and stunning display.",
+    availability: 'in-stock' as const
   },
   {
     id: 2,
@@ -30,7 +31,8 @@ const sampleProducts = [
     price: 199.99,
     rating: 4.8,
     image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
-    description: "Premium noise-canceling headphones with exceptional sound quality and comfort."
+    description: "Premium noise-canceling headphones with exceptional sound quality and comfort.",
+    availability: 'low-stock' as const
   },
   {
     id: 3,
@@ -38,7 +40,8 @@ const sampleProducts = [
     price: 299.99,
     rating: 4.3,
     image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
-    description: "Advanced fitness and health tracking with smart notifications and long battery life."
+    description: "Advanced fitness and health tracking with smart notifications and long battery life.",
+    availability: 'out-of-stock' as const
   },
   {
     id: 4,
@@ -46,7 +49,8 @@ const sampleProducts = [
     price: 159.99,
     rating: 4.6,
     image: "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb",
-    description: "True wireless earbuds with premium sound quality and active noise cancellation."
+    description: "True wireless earbuds with premium sound quality and active noise cancellation.",
+    availability: 'in-stock' as const
   },
   {
     id: 5,
@@ -54,7 +58,8 @@ const sampleProducts = [
     price: 699.99,
     rating: 4.7,
     image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32",
-    description: "Professional-grade digital camera with advanced features for stunning photography."
+    description: "Professional-grade digital camera with advanced features for stunning photography.",
+    availability: 'in-stock' as const
   }
 ];
 

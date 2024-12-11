@@ -8,6 +8,7 @@ interface Product {
   rating: number;
   image: string;
   description: string;
+  availability: 'in-stock' | 'low-stock' | 'out-of-stock';
 }
 
 interface ProductListProps {
@@ -28,6 +29,7 @@ const ProductList = ({ products, onSelectProduct, onBuyProduct }: ProductListPro
               price={product.price}
               rating={product.rating}
               description={product.description}
+              availability={product.availability}
               onSelect={() => onSelectProduct(product)}
               onBuy={() => onBuyProduct(product)}
             />

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Star, ShoppingCart } from 'lucide-react';
+import { Heart, Star, ShoppingCart, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ProductCardProps {
@@ -8,11 +8,21 @@ interface ProductCardProps {
   price: number;
   rating: number;
   description: string;
+  availability: 'in-stock' | 'low-stock' | 'out-of-stock';
   onSelect: () => void;
   onBuy: () => void;
 }
 
-const ProductCard = ({ image, name, price, rating, description, onSelect, onBuy }: ProductCardProps) => {
+const ProductCard = ({ 
+  image, 
+  name, 
+  price, 
+  rating, 
+  description, 
+  availability,
+  onSelect, 
+  onBuy 
+}: ProductCardProps) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -23,9 +33,7 @@ const ProductCard = ({ image, name, price, rating, description, onSelect, onBuy 
   const handleAddToWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsWishlisted(!isWishlisted);
-    toast.success(isWishlisted ? 'Removed from wishlist!' : 'Added to wishlist!', {
-      position: 'bottom-right',
-    });
+    toast.success(isWishlisted ? 'Removed from wishlist!' : 'Added to wishlist!');
   };
 
   const handleBuy = (e: React.MouseEvent) => {
@@ -33,12 +41,37 @@ const ProductCard = ({ image, name, price, rating, description, onSelect, onBuy 
     onBuy();
   };
 
+  const getAvailabilityColor = () => {
+    switch (availability) {
+      case 'in-stock':
+        return 'text-green-500';
+      case 'low-stock':
+        return 'text-orange-500';
+      case 'out-of-stock':
+        return 'text-red-500';
+      default:
+        return 'text-gray-500';
+    }
+  };
+
+  const getAvailabilityText = () => {
+    switch (availability) {
+      case 'in-stock':
+        return 'In Stock';
+      case 'low-stock':
+        return 'Low Stock';
+      case 'out-of-stock':
+        return 'Out of Stock';
+      default:
+        return 'Checking...';
+    }
+  };
+
   return (
     <div 
       onClick={onSelect}
       className="relative group w-72 rounded-xl overflow-hidden transition-all duration-300 cursor-pointer animate-fade-in"
     >
-      {/* Metallic gradient background with noise */}
       <div className="absolute inset-0 bg-gradient-to-br from-metallic-light via-metallic to-metallic-dark opacity-90 backdrop-blur-sm border border-white/50 shadow-lg bg-noise" />
       
       <div className="relative p-4">
@@ -65,9 +98,17 @@ const ProductCard = ({ image, name, price, rating, description, onSelect, onBuy 
           <h3 className="font-semibold text-lg text-gray-800">{name}</h3>
           <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
           
-          <div className="flex items-center space-x-1">
-            <Star className="text-yellow-400 fill-current" size={16} />
-            <span className="text-sm text-gray-600">{rating}</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-1">
+              <Star className="text-yellow-400 fill-current" size={16} />
+              <span className="text-sm text-gray-600">{rating}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Clock size={16} className={getAvailabilityColor()} />
+              <span className={`text-sm ${getAvailabilityColor()}`}>
+                {getAvailabilityText()}
+              </span>
+            </div>
           </div>
           
           <div className="flex items-center justify-between pt-2">
@@ -82,8 +123,9 @@ const ProductCard = ({ image, name, price, rating, description, onSelect, onBuy 
                 <ShoppingCart size={16} />
               </button>
               <button 
-                className="flex items-center space-x-1 px-4 py-2 bg-accent/90 text-white rounded-full text-sm hover:bg-accent transition-colors backdrop-blur-sm shadow-lg"
+                className="flex items-center space-x-1 px-4 py-2 bg-accent/90 text-white rounded-full text-sm hover:bg-accent transition-colors backdrop-blur-sm shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleBuy}
+                disabled={availability === 'out-of-stock'}
               >
                 Buy Now
               </button>
