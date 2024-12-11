@@ -38,11 +38,11 @@ const ProductCard = ({ image, name, price, rating, description, onSelect, onBuy 
       onClick={onSelect}
       className="relative group w-72 rounded-xl overflow-hidden transition-all duration-300 cursor-pointer animate-fade-in"
     >
-      {/* Metallic gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-gray-100/90 to-gray-200/80 backdrop-blur-md border border-white/50 shadow-lg" />
+      {/* Metallic gradient background with noise */}
+      <div className="absolute inset-0 bg-gradient-to-br from-metallic-light via-metallic to-metallic-dark opacity-90 backdrop-blur-sm border border-white/50 shadow-lg bg-noise" />
       
-      <div className="relative">
-        <div className="relative h-48 overflow-hidden">
+      <div className="relative p-4">
+        <div className="relative h-48 overflow-hidden rounded-lg">
           <img 
             src={image} 
             alt={name}
@@ -54,14 +54,14 @@ const ProductCard = ({ image, name, price, rating, description, onSelect, onBuy 
               isWishlisted 
                 ? 'bg-accent text-white' 
                 : 'bg-white/70 hover:bg-white text-gray-700 hover:text-accent'
-            } backdrop-blur-sm`}
+            } backdrop-blur-sm shadow-lg`}
             onClick={handleAddToWishlist}
           >
             <Heart size={20} className={isWishlisted ? 'fill-current' : ''} />
           </button>
         </div>
         
-        <div className="relative p-4 space-y-3">
+        <div className="relative space-y-3 mt-4">
           <h3 className="font-semibold text-lg text-gray-800">{name}</h3>
           <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
           
@@ -71,18 +71,18 @@ const ProductCard = ({ image, name, price, rating, description, onSelect, onBuy 
           </div>
           
           <div className="flex items-center justify-between pt-2">
-            <span className="font-bold text-lg bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            <span className="font-bold text-lg bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
               ${price.toFixed(2)}
             </span>
             <div className="flex gap-2">
               <button 
-                className="flex items-center space-x-1 p-2 bg-primary/80 text-white rounded-full text-sm hover:bg-primary transition-colors backdrop-blur-sm hover:shadow-lg"
+                className="flex items-center space-x-1 p-2 bg-primary/80 text-white rounded-full text-sm hover:bg-primary transition-colors backdrop-blur-sm shadow-lg"
                 onClick={handleAddToCart}
               >
                 <ShoppingCart size={16} />
               </button>
               <button 
-                className="flex items-center space-x-1 px-4 py-2 bg-accent/90 text-white rounded-full text-sm hover:bg-accent transition-colors backdrop-blur-sm hover:shadow-lg"
+                className="flex items-center space-x-1 px-4 py-2 bg-accent/90 text-white rounded-full text-sm hover:bg-accent transition-colors backdrop-blur-sm shadow-lg"
                 onClick={handleBuy}
               >
                 Buy Now
