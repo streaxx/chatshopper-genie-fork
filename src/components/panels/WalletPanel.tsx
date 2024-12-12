@@ -1,25 +1,15 @@
 import React, { useState } from 'react';
-import { Wallet, History, Plus } from 'lucide-react';
+import { Wallet, History, Plus, CreditCard, QrCode, Copy, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { toast } from 'sonner';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const WalletPanel = () => {
   const [balance, setBalance] = useState(500);
   const [selectedAmount, setSelectedAmount] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [isAddingFunds, setIsAddingFunds] = useState(false);
 
   const transactions = [
@@ -30,21 +20,38 @@ const WalletPanel = () => {
   const rechargeAmounts = [100, 500, 1000, 2000];
   
   const paymentMethods = [
-    { id: 'credit-card', label: 'Credit/Debit Card' },
-    { id: 'google-pay', label: 'Google Pay' },
-    { id: 'apple-pay', label: 'Apple Pay' },
-    { id: 'upi', label: 'UPI' },
-    { id: 'usdc', label: 'USDC' },
-    { id: 'sol', label: 'Solana (SOL)' },
-    { id: 'eth', label: 'Ethereum (ETH)' },
+    { id: 'credit-card', label: 'Credit/Debit Card', type: 'card' },
+    { id: 'google-pay', label: 'Google Pay', type: 'qr' },
+    { id: 'apple-pay', label: 'Apple Pay', type: 'qr' },
+    { id: 'usdc', label: 'USDC', type: 'crypto' },
+    { id: 'sol', label: 'Solana (SOL)', type: 'crypto' },
+    { id: 'eth', label: 'Ethereum (ETH)', type: 'crypto' },
   ];
 
   const handleAddFunds = () => {
-    if (!selectedAmount || !paymentMethod) {
-      toast.error('Please select an amount and payment method');
+    if (!selectedAmount) {
+      toast.error('Please select an amount');
       return;
     }
-    
+    setIsAddingFunds(true);
+  };
+
+  const handlePaymentMethodSelect = (method: string) => {
+    setPaymentMethod(method);
+    setShowPaymentDetails(true);
+  };
+
+  const handleBack = () => {
+    if (showPaymentDetails) {
+      setShowPaymentDetails(false);
+    } else {
+      setIsAddingFunds(false);
+      setSelectedAmount('');
+      setPaymentMethod('');
+    }
+  };
+
+  const handleProcessPayment = () => {
     // Simulate payment processing
     toast.loading('Processing payment...');
     setTimeout(() => {
@@ -52,12 +59,101 @@ const WalletPanel = () => {
       setIsAddingFunds(false);
       setSelectedAmount('');
       setPaymentMethod('');
+      setShowPaymentDetails(false);
       toast.success(`Successfully added $${selectedAmount} to wallet`);
     }, 2000);
   };
 
+  const renderPaymentDetails = () => {
+    const selectedPaymentMethod = paymentMethods.find(m => m.id === paymentMethod);
+    
+    if (!selectedPaymentMethod) return null;
+
+    switch (selectedPaymentMethod.type) {
+      case 'card':
+        return (
+          <div className="space-y-4">
+            <Input
+              type="text"
+              placeholder="Card Number"
+              className="w-full"
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                type="text"
+                placeholder="MM/YY"
+                className="w-full"
+              />
+              <Input
+                type="text"
+                placeholder="CVV"
+                className="w-full"
+              />
+            </div>
+            <Button
+              onClick={handleProcessPayment}
+              className="w-full bg-primary hover:bg-primary/90"
+            >
+              Pay ${selectedAmount}
+            </Button>
+          </div>
+        );
+
+      case 'qr':
+        return (
+          <div className="space-y-4 text-center">
+            <div className="bg-gray-100 p-8 rounded-lg mx-auto w-fit">
+              <QrCode className="w-32 h-32 mx-auto text-gray-600" />
+            </div>
+            <p className="text-sm text-gray-600">
+              Scan this QR code to complete payment with {selectedPaymentMethod.label}
+            </p>
+            <Button
+              onClick={handleProcessPayment}
+              className="w-full bg-primary hover:bg-primary/90"
+            >
+              I've completed the payment
+            </Button>
+          </div>
+        );
+
+      case 'crypto':
+        const dummyAddress = '0x1234...5678';
+        return (
+          <div className="space-y-4">
+            <div className="bg-gray-100 p-8 rounded-lg mx-auto w-fit">
+              <QrCode className="w-32 h-32 mx-auto text-gray-600" />
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+              <code className="flex-1 text-sm">{dummyAddress}</code>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  navigator.clipboard.writeText(dummyAddress);
+                  toast.success('Address copied to clipboard');
+                }}
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-sm text-gray-600">
+              Send {selectedAmount} {selectedPaymentMethod.label} to this address
+            </p>
+            <Button
+              onClick={handleProcessPayment}
+              className="w-full bg-primary hover:bg-primary/90"
+            >
+              I've sent the payment
+            </Button>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Balance Display */}
       <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 p-6 rounded-xl backdrop-blur-sm border border-white/20">
         <div className="flex items-center gap-3 mb-4">
           <Wallet className="w-6 h-6 text-primary" />
@@ -66,112 +162,117 @@ const WalletPanel = () => {
         <p className="text-3xl font-bold">${balance.toFixed(2)}</p>
       </div>
 
-      <Dialog open={isAddingFunds} onOpenChange={setIsAddingFunds}>
-        <DialogTrigger asChild>
-          <Button 
-            className="w-full gap-2 bg-primary hover:bg-primary/90"
-            onClick={() => setIsAddingFunds(true)}
-          >
-            <Plus className="w-4 h-4" />
-            Add Funds
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add Funds to Wallet</DialogTitle>
-            <DialogDescription>
-              Choose an amount and payment method to add funds to your wallet.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <label className="text-sm font-medium">Select Amount</label>
-              <div className="grid grid-cols-2 gap-3">
-                {rechargeAmounts.map((amount) => (
-                  <button
-                    key={amount}
-                    onClick={() => setSelectedAmount(amount.toString())}
-                    className={`p-3 border rounded-lg font-medium transition-colors ${
-                      selectedAmount === amount.toString()
-                        ? 'bg-primary text-white border-primary'
-                        : 'hover:bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                    ${amount}
-                  </button>
-                ))}
-              </div>
-              <div className="relative">
-                <Input
-                  type="number"
-                  placeholder="Or enter custom amount"
-                  value={selectedAmount}
-                  onChange={(e) => setSelectedAmount(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <label className="text-sm font-medium">Select Payment Method</label>
-              <RadioGroup
-                value={paymentMethod}
-                onValueChange={setPaymentMethod}
-                className="grid gap-2"
-              >
-                {paymentMethods.map((method) => (
-                  <div
-                    key={method.id}
-                    className={`flex items-center space-x-2 rounded-lg border p-4 transition-colors ${
-                      paymentMethod === method.id
-                        ? 'border-primary bg-primary/5'
-                        : 'border-gray-200'
-                    }`}
-                  >
-                    <RadioGroupItem value={method.id} id={method.id} />
-                    <label
-                      htmlFor={method.id}
-                      className="flex-grow cursor-pointer font-medium"
-                    >
-                      {method.label}
-                    </label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-
+      {/* Add Funds Section */}
+      {!isAddingFunds ? (
+        <Button 
+          className="w-full gap-2 bg-primary hover:bg-primary/90"
+          onClick={handleAddFunds}
+        >
+          <Plus className="w-4 h-4" />
+          Add Funds
+        </Button>
+      ) : (
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
             <Button
-              onClick={handleAddFunds}
-              className="w-full bg-primary hover:bg-primary/90"
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
             >
-              Add Funds
+              <ArrowLeft className="w-4 h-4" />
             </Button>
+            <h3 className="font-medium">Add Funds</h3>
           </div>
-        </DialogContent>
-      </Dialog>
 
-      <div className="space-y-4">
-        <h3 className="flex items-center gap-2 font-medium">
-          <History className="w-5 h-5" />
-          Recent Transactions
-        </h3>
-        <div className="space-y-3">
-          {transactions.map((tx) => (
-            <div
-              key={tx.id}
-              className="flex items-center justify-between p-4 bg-white/50 backdrop-blur-sm rounded-lg border border-white/20"
-            >
-              <div>
-                <p className="font-medium">{tx.type}</p>
-                <p className="text-sm text-gray-500">{tx.date}</p>
+          {!showPaymentDetails ? (
+            <>
+              <div className="space-y-4">
+                <label className="text-sm font-medium">Select Amount</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {rechargeAmounts.map((amount) => (
+                    <button
+                      key={amount}
+                      onClick={() => setSelectedAmount(amount.toString())}
+                      className={`p-3 border rounded-lg font-medium transition-colors ${
+                        selectedAmount === amount.toString()
+                          ? 'bg-primary text-white border-primary'
+                          : 'hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      ${amount}
+                    </button>
+                  ))}
+                </div>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    placeholder="Or enter custom amount"
+                    value={selectedAmount}
+                    onChange={(e) => setSelectedAmount(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
               </div>
-              <span className={`font-medium ${tx.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {tx.amount > 0 ? '+' : ''}{tx.amount}
-              </span>
-            </div>
-          ))}
+
+              <div className="space-y-4">
+                <label className="text-sm font-medium">Select Payment Method</label>
+                <RadioGroup
+                  value={paymentMethod}
+                  onValueChange={handlePaymentMethodSelect}
+                  className="grid gap-2"
+                >
+                  {paymentMethods.map((method) => (
+                    <div
+                      key={method.id}
+                      className={`flex items-center space-x-2 rounded-lg border p-4 transition-colors ${
+                        paymentMethod === method.id
+                          ? 'border-primary bg-primary/5'
+                          : 'border-gray-200'
+                      }`}
+                    >
+                      <RadioGroupItem value={method.id} id={method.id} />
+                      <label
+                        htmlFor={method.id}
+                        className="flex-grow cursor-pointer font-medium"
+                      >
+                        {method.label}
+                      </label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            </>
+          ) : (
+            renderPaymentDetails()
+          )}
         </div>
-      </div>
+      )}
+
+      {/* Transactions History */}
+      {!isAddingFunds && (
+        <div className="space-y-4">
+          <h3 className="flex items-center gap-2 font-medium">
+            <History className="w-5 h-5" />
+            Recent Transactions
+          </h3>
+          <div className="space-y-3">
+            {transactions.map((tx) => (
+              <div
+                key={tx.id}
+                className="flex items-center justify-between p-4 bg-white/50 backdrop-blur-sm rounded-lg border border-white/20"
+              >
+                <div>
+                  <p className="font-medium">{tx.type}</p>
+                  <p className="text-sm text-gray-500">{tx.date}</p>
+                </div>
+                <span className={`font-medium ${tx.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {tx.amount > 0 ? '+' : ''}{tx.amount}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
