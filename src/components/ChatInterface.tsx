@@ -15,6 +15,19 @@ import ChatMessage from './ChatMessage';
 import WalletBalance from './WalletBalance';
 import WalletPanel from './panels/WalletPanel';
 
+const sampleProducts = [
+  {
+    id: 1,
+    name: "Premium Laptop",
+    price: 999.99,
+    rating: 4.5,
+    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+    description: "High-performance laptop with the latest tech specs.",
+    availability: 'in-stock' as const
+  },
+  // Additional sample products can be added here
+];
+
 interface MenuItem {
   icon: React.ReactNode;
   label: string;
@@ -33,15 +46,13 @@ const ChatInterface = () => {
     { isUser: false, content: "Welcome! I'm your shopping assistant. What are you looking for today?", timestamp: Date.now() }
   ]);
 
-  // Store menuItems in state so we can update it
   const [menuItems, setMenuItems] = useState<MenuItem[]>([
     { icon: <History className="w-5 h-5" />, label: "History", panel: <HistoryPanel />, position: 'top' },
     { icon: <Bell className="w-5 h-5" />, label: "Notifications", panel: <NotificationsPanel />, position: 'top' },
     { icon: <Heart className="w-5 h-5" />, label: "Wishlist", panel: <WishlistPanel />, position: 'top' },
     { icon: <HelpCircle className="w-5 h-5" />, label: "Help", panel: <HelpPanel />, position: 'top' },
     { icon: <Package className="w-5 h-5" />, label: "Order Status", panel: <OrderStatusPanel />, position: 'top' },
-    { icon: <User className="w-5 h-5" />, label: "Account", panel: <AccountPanel />, position: 'bottom' },
-    { icon: <Wallet className="w-5 h-5" />, label: "Wallet", panel: <WalletPanel />, position: 'top' }
+    { icon: <User className="w-5 h-5" />, label: "Account", panel: <AccountPanel onWalletClick={() => handleWalletClick()} />, position: 'bottom' }
   ]);
 
   const handleSend = (e: React.FormEvent) => {
@@ -91,15 +102,15 @@ const ChatInterface = () => {
     }]);
   };
 
+  const handleWalletClick = () => {
+    // Set active panel to WalletPanel directly
+    setActivePanelIndex(menuItems.length); // This will be one more than the last index
+    setIsMenuOpen(false);
+    console.log('Opening wallet panel directly');
+  };
+
   // Sort messages by timestamp to ensure correct order
   const sortedMessages = [...messages].sort((a, b) => a.timestamp - b.timestamp);
-
-  const handleWalletClick = () => {
-    const walletPanelIndex = menuItems.findIndex(item => item.label === "Wallet");
-    setActivePanelIndex(walletPanelIndex);
-    setIsMenuOpen(false);
-    console.log('Wallet clicked, panel index:', walletPanelIndex);
-  };
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50/80 via-white/40 to-blue-50/80">
@@ -154,17 +165,26 @@ const ChatInterface = () => {
       )}
 
       {/* Side Panel */}
-      {activePanelIndex !== null && menuItems[activePanelIndex] && (
+      {activePanelIndex !== null && (
         <SidePanel
           isOpen={activePanelIndex !== null}
           onClose={() => setActivePanelIndex(null)}
-          title={menuItems[activePanelIndex].label}
+          title={activePanelIndex < menuItems.length ? menuItems[activePanelIndex].label : "Wallet"}
           onBack={() => {
-            setActivePanelIndex(null);
-            setIsMenuOpen(true);
+            if (activePanelIndex === menuItems.length) {
+              // If we're in wallet panel, go back to account
+              const accountIndex = menuItems.findIndex(item => item.label === "Account");
+              setActivePanelIndex(accountIndex);
+            } else {
+              setActivePanelIndex(null);
+              setIsMenuOpen(true);
+            }
           }}
         >
-          {menuItems[activePanelIndex].panel}
+          {activePanelIndex < menuItems.length ? 
+            menuItems[activePanelIndex].panel : 
+            <WalletPanel />
+          }
         </SidePanel>
       )}
 

@@ -1,8 +1,11 @@
 import React from 'react';
 import { User, Wallet, Settings, LogOut } from 'lucide-react';
-import WalletPanel from './WalletPanel';
 
-const AccountPanel = () => {
+interface AccountPanelProps {
+  onWalletClick: () => void;
+}
+
+const AccountPanel = ({ onWalletClick }: AccountPanelProps) => {
   const userProfile = {
     email: 'user@example.com',
     walletAddress: '0x1234...5678',
@@ -24,7 +27,10 @@ const AccountPanel = () => {
       </div>
 
       <div className="space-y-2">
-        <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors">
+        <button 
+          onClick={onWalletClick}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors"
+        >
           <Wallet className="w-5 h-5" />
           <span>Wallet</span>
         </button>
