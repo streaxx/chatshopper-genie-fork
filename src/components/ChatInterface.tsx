@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Mic, History, Bell, Heart, HelpCircle, User, Receipt, Menu, X, Settings } from 'lucide-react';
+import { Send, Mic, History, Bell, Heart, HelpCircle, User, Receipt, Menu, X, Settings, Package } from 'lucide-react';
 import ProductList from './ProductList';
 import ProductOverlay from './ProductOverlay';
 import { toast } from 'sonner';
