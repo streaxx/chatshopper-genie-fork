@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Mic, History, Bell, Heart, HelpCircle, User, Receipt, Package, Menu, X, Wallet } from 'lucide-react';
+import { Send, Mic, History, Bell, Heart, HelpCircle, User, Receipt, Menu, X, Settings } from 'lucide-react';
 import ProductList from './ProductList';
 import ProductOverlay from './ProductOverlay';
 import { toast } from 'sonner';
@@ -14,6 +14,8 @@ import OrderProcessing from './OrderProcessing';
 import ChatMessage from './ChatMessage';
 import WalletBalance from './WalletBalance';
 import WalletPanel from './panels/WalletPanel';
+import AddressSelector from './AddressSelector';
+import SettingsPanel from './panels/SettingsPanel';
 
 const sampleProducts = [
   {
@@ -52,6 +54,7 @@ const ChatInterface = () => {
     { icon: <Heart className="w-5 h-5" />, label: "Wishlist", panel: <WishlistPanel />, position: 'top' },
     { icon: <HelpCircle className="w-5 h-5" />, label: "Help", panel: <HelpPanel />, position: 'top' },
     { icon: <Package className="w-5 h-5" />, label: "Order Status", panel: <OrderStatusPanel />, position: 'top' },
+    { icon: <Settings className="w-5 h-5" />, label: "Settings", panel: <SettingsPanel />, position: 'bottom' },
     { icon: <User className="w-5 h-5" />, label: "Account", panel: <AccountPanel onWalletClick={() => handleWalletClick()} />, position: 'bottom' }
   ]);
 
@@ -103,10 +106,17 @@ const ChatInterface = () => {
   };
 
   const handleWalletClick = () => {
-    // Set active panel to WalletPanel directly
-    setActivePanelIndex(menuItems.length); // This will be one more than the last index
+    setActivePanelIndex(menuItems.length);
     setIsMenuOpen(false);
     console.log('Opening wallet panel directly');
+  };
+
+  const handleAddAddress = () => {
+    // Find the Account panel index
+    const accountIndex = menuItems.findIndex(item => item.label === "Account");
+    setActivePanelIndex(accountIndex);
+    setIsMenuOpen(false);
+    console.log('Opening account panel for address addition');
   };
 
   // Sort messages by timestamp to ensure correct order
@@ -116,10 +126,13 @@ const ChatInterface = () => {
     <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50/80 via-white/40 to-blue-50/80">
       {/* Top Bar */}
       <div className="flex items-center justify-between p-4">
-        <WalletBalance
-          balance={walletBalance}
-          onClick={handleWalletClick}
-        />
+        <div className="flex items-center gap-2">
+          <WalletBalance
+            balance={walletBalance}
+            onClick={handleWalletClick}
+          />
+          <AddressSelector onAddAddress={handleAddAddress} />
+        </div>
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="p-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-white/50"
@@ -128,6 +141,7 @@ const ChatInterface = () => {
         </button>
       </div>
 
+      {/* Menu and Panels */}
       {isMenuOpen && (
         <div className="fixed top-20 right-4 z-50 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-white/50 p-2 animate-fade-in">
           <div className="flex flex-col space-y-1">
@@ -151,7 +165,8 @@ const ChatInterface = () => {
               <button
                 key={index}
                 onClick={() => {
-                  setActivePanelIndex(menuItems.length - 1);
+                  const realIndex = menuItems.findIndex(menuItem => menuItem.label === item.label);
+                  setActivePanelIndex(realIndex);
                   setIsMenuOpen(false);
                 }}
                 className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors"
@@ -172,7 +187,6 @@ const ChatInterface = () => {
           title={activePanelIndex < menuItems.length ? menuItems[activePanelIndex].label : "Wallet"}
           onBack={() => {
             if (activePanelIndex === menuItems.length) {
-              // If we're in wallet panel, go back to account
               const accountIndex = menuItems.findIndex(item => item.label === "Account");
               setActivePanelIndex(accountIndex);
             } else {
