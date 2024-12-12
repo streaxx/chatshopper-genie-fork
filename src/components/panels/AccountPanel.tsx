@@ -1,16 +1,23 @@
 import React from 'react';
 import { User, Wallet, Settings, LogOut } from 'lucide-react';
+import SettingsPanel from './SettingsPanel';
 
 interface AccountPanelProps {
   onWalletClick: () => void;
 }
 
 const AccountPanel = ({ onWalletClick }: AccountPanelProps) => {
+  const [showSettings, setShowSettings] = React.useState(false);
+
   const userProfile = {
     email: 'user@example.com',
     walletAddress: '0x1234...5678',
     profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e'
   };
+
+  if (showSettings) {
+    return <SettingsPanel onBack={() => setShowSettings(false)} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -34,7 +41,10 @@ const AccountPanel = ({ onWalletClick }: AccountPanelProps) => {
           <Wallet className="w-5 h-5" />
           <span>Wallet</span>
         </button>
-        <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors">
+        <button 
+          onClick={() => setShowSettings(true)}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors"
+        >
           <Settings className="w-5 h-5" />
           <span>Settings</span>
         </button>

@@ -54,7 +54,6 @@ const ChatInterface = () => {
     { icon: <Heart className="w-5 h-5" />, label: "Wishlist", panel: <WishlistPanel />, position: 'top' },
     { icon: <HelpCircle className="w-5 h-5" />, label: "Help", panel: <HelpPanel />, position: 'top' },
     { icon: <Package className="w-5 h-5" />, label: "Order Status", panel: <OrderStatusPanel />, position: 'top' },
-    { icon: <Settings className="w-5 h-5" />, label: "Settings", panel: <SettingsPanel />, position: 'bottom' },
     { icon: <User className="w-5 h-5" />, label: "Account", panel: <AccountPanel onWalletClick={() => handleWalletClick()} />, position: 'bottom' }
   ]);
 
@@ -116,7 +115,7 @@ const ChatInterface = () => {
     const accountIndex = menuItems.findIndex(item => item.label === "Account");
     setActivePanelIndex(accountIndex);
     setIsMenuOpen(false);
-    console.log('Opening account panel for address addition');
+    console.log('Opening account panel for address management');
   };
 
   // Sort messages by timestamp to ensure correct order

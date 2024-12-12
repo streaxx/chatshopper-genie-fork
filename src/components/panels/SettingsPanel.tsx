@@ -1,8 +1,12 @@
 import React from 'react';
-import { User, MapPin, Mail, Key } from 'lucide-react';
+import { User, MapPin, Mail, Key, ArrowLeft } from 'lucide-react';
 import { Separator } from '../ui/separator';
 
-const SettingsPanel = () => {
+interface SettingsPanelProps {
+  onBack?: () => void;
+}
+
+const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
   const userDetails = {
     id: "USER123",
     email: "user@example.com",
@@ -19,6 +23,16 @@ const SettingsPanel = () => {
 
   return (
     <div className="space-y-6">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-primary mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Account
+        </button>
+      )}
+
       <div className="space-y-4">
         <div className="flex items-center gap-3 p-4 bg-white/50 rounded-xl">
           <User className="w-5 h-5 text-primary" />
@@ -52,6 +66,10 @@ const SettingsPanel = () => {
             </div>
           </div>
         ))}
+        <button className="w-full flex items-center gap-3 p-4 bg-white/50 rounded-xl hover:bg-white/70 transition-colors text-primary">
+          <MapPin className="w-5 h-5" />
+          Add New Address
+        </button>
       </div>
 
       <Separator />
