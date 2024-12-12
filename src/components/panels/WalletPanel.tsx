@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Wallet, History, Plus, CreditCard, QrCode, Copy, ArrowLeft } from 'lucide-react';
+import { Wallet, History, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from "@/components/ui/input";
 import { toast } from 'sonner';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import RechargeAmounts from './wallet/RechargeAmounts';
+import PaymentMethods from './wallet/PaymentMethods';
+import PaymentDetails from './wallet/PaymentDetails';
 
 const WalletPanel = () => {
   const [balance, setBalance] = useState(500);
@@ -17,22 +18,7 @@ const WalletPanel = () => {
     { id: 2, type: 'Purchase', amount: -50, date: '2024-03-09' },
   ];
 
-  const rechargeAmounts = [100, 500, 1000, 2000];
-  
-  const paymentMethods = [
-    { id: 'credit-card', label: 'Credit/Debit Card', type: 'card' },
-    { id: 'google-pay', label: 'Google Pay', type: 'qr' },
-    { id: 'apple-pay', label: 'Apple Pay', type: 'qr' },
-    { id: 'usdc', label: 'USDC', type: 'crypto' },
-    { id: 'sol', label: 'Solana (SOL)', type: 'crypto' },
-    { id: 'eth', label: 'Ethereum (ETH)', type: 'crypto' },
-  ];
-
   const handleAddFunds = () => {
-    if (!selectedAmount) {
-      toast.error('Please select an amount');
-      return;
-    }
     setIsAddingFunds(true);
   };
 
@@ -52,6 +38,10 @@ const WalletPanel = () => {
   };
 
   const handleProcessPayment = () => {
+    if (!selectedAmount) {
+      toast.error('Please select an amount');
+      return;
+    }
     // Simulate payment processing
     toast.loading('Processing payment...');
     setTimeout(() => {
@@ -62,93 +52,6 @@ const WalletPanel = () => {
       setShowPaymentDetails(false);
       toast.success(`Successfully added $${selectedAmount} to wallet`);
     }, 2000);
-  };
-
-  const renderPaymentDetails = () => {
-    const selectedPaymentMethod = paymentMethods.find(m => m.id === paymentMethod);
-    
-    if (!selectedPaymentMethod) return null;
-
-    switch (selectedPaymentMethod.type) {
-      case 'card':
-        return (
-          <div className="space-y-4">
-            <Input
-              type="text"
-              placeholder="Card Number"
-              className="w-full"
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                type="text"
-                placeholder="MM/YY"
-                className="w-full"
-              />
-              <Input
-                type="text"
-                placeholder="CVV"
-                className="w-full"
-              />
-            </div>
-            <Button
-              onClick={handleProcessPayment}
-              className="w-full bg-primary hover:bg-primary/90"
-            >
-              Pay ${selectedAmount}
-            </Button>
-          </div>
-        );
-
-      case 'qr':
-        return (
-          <div className="space-y-4 text-center">
-            <div className="bg-gray-100 p-8 rounded-lg mx-auto w-fit">
-              <QrCode className="w-32 h-32 mx-auto text-gray-600" />
-            </div>
-            <p className="text-sm text-gray-600">
-              Scan this QR code to complete payment with {selectedPaymentMethod.label}
-            </p>
-            <Button
-              onClick={handleProcessPayment}
-              className="w-full bg-primary hover:bg-primary/90"
-            >
-              I've completed the payment
-            </Button>
-          </div>
-        );
-
-      case 'crypto':
-        const dummyAddress = '0x1234...5678';
-        return (
-          <div className="space-y-4">
-            <div className="bg-gray-100 p-8 rounded-lg mx-auto w-fit">
-              <QrCode className="w-32 h-32 mx-auto text-gray-600" />
-            </div>
-            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-              <code className="flex-1 text-sm">{dummyAddress}</code>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  navigator.clipboard.writeText(dummyAddress);
-                  toast.success('Address copied to clipboard');
-                }}
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-            </div>
-            <p className="text-sm text-gray-600">
-              Send {selectedAmount} {selectedPaymentMethod.label} to this address
-            </p>
-            <Button
-              onClick={handleProcessPayment}
-              className="w-full bg-primary hover:bg-primary/90"
-            >
-              I've sent the payment
-            </Button>
-          </div>
-        );
-    }
   };
 
   return (
@@ -168,7 +71,6 @@ const WalletPanel = () => {
           className="w-full gap-2 bg-primary hover:bg-primary/90"
           onClick={handleAddFunds}
         >
-          <Plus className="w-4 h-4" />
           Add Funds
         </Button>
       ) : (
@@ -185,65 +87,24 @@ const WalletPanel = () => {
           </div>
 
           {!showPaymentDetails ? (
-            <>
-              <div className="space-y-4">
-                <label className="text-sm font-medium">Select Amount</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {rechargeAmounts.map((amount) => (
-                    <button
-                      key={amount}
-                      onClick={() => setSelectedAmount(amount.toString())}
-                      className={`p-3 border rounded-lg font-medium transition-colors ${
-                        selectedAmount === amount.toString()
-                          ? 'bg-primary text-white border-primary'
-                          : 'hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      ${amount}
-                    </button>
-                  ))}
-                </div>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    placeholder="Or enter custom amount"
-                    value={selectedAmount}
-                    onChange={(e) => setSelectedAmount(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <label className="text-sm font-medium">Select Payment Method</label>
-                <RadioGroup
-                  value={paymentMethod}
-                  onValueChange={handlePaymentMethodSelect}
-                  className="grid gap-2"
-                >
-                  {paymentMethods.map((method) => (
-                    <div
-                      key={method.id}
-                      className={`flex items-center space-x-2 rounded-lg border p-4 transition-colors ${
-                        paymentMethod === method.id
-                          ? 'border-primary bg-primary/5'
-                          : 'border-gray-200'
-                      }`}
-                    >
-                      <RadioGroupItem value={method.id} id={method.id} />
-                      <label
-                        htmlFor={method.id}
-                        className="flex-grow cursor-pointer font-medium"
-                      >
-                        {method.label}
-                      </label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-            </>
+            <div className="space-y-6">
+              <RechargeAmounts
+                selectedAmount={selectedAmount}
+                setSelectedAmount={setSelectedAmount}
+              />
+              {selectedAmount && (
+                <PaymentMethods
+                  paymentMethod={paymentMethod}
+                  onPaymentMethodSelect={handlePaymentMethodSelect}
+                />
+              )}
+            </div>
           ) : (
-            renderPaymentDetails()
+            <PaymentDetails
+              selectedAmount={selectedAmount}
+              paymentMethod={paymentMethod}
+              onProcessPayment={handleProcessPayment}
+            />
           )}
         </div>
       )}
