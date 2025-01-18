@@ -39,13 +39,12 @@ interface MenuItem {
 }
 
 const ChatInterface = () => {
-  const { updateWalletBalance, addTransaction, addOrder } = useApp();
+  const { walletBalance, updateWalletBalance, addTransaction, addOrder } = useApp();
   const [message, setMessage] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activePanelIndex, setActivePanelIndex] = useState<number | null>(null);
   const [processingOrder, setProcessingOrder] = useState<any>(null);
-  const [walletBalance, setWalletBalance] = useState(1000);
   const [messages, setMessages] = useState<Array<{ isUser: boolean; content: React.ReactNode; timestamp: number }>>([
     { isUser: false, content: "Welcome! I'm your shopping assistant. What are you looking for today?", timestamp: Date.now() }
   ]);
@@ -103,15 +102,17 @@ const ChatInterface = () => {
       ]
     });
 
-    // Add transaction
+    // Add transaction and update wallet balance
+    const transactionAmount = -product.price;
     addTransaction({
       type: 'expense',
-      amount: -product.price,
+      amount: transactionAmount,
       description: `Purchase: ${product.name}`
     });
-
+    
     // Update wallet balance
-    updateWalletBalance(-product.price);
+    updateWalletBalance(transactionAmount);
+    console.log('Wallet balance updated after purchase:', walletBalance + transactionAmount);
 
     setMessages(prev => [...prev, {
       isUser: false,
@@ -135,7 +136,6 @@ const ChatInterface = () => {
   };
 
   const handleAddAddress = () => {
-    // Find the Account panel index
     const accountIndex = menuItems.findIndex(item => item.label === "Account");
     setActivePanelIndex(accountIndex);
     setIsMenuOpen(false);

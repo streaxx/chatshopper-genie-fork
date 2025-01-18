@@ -5,18 +5,14 @@ import { toast } from 'sonner';
 import RechargeAmounts from './wallet/RechargeAmounts';
 import PaymentMethods from './wallet/PaymentMethods';
 import PaymentDetails from './wallet/PaymentDetails';
+import { useApp } from '@/contexts/AppContext';
 
 const WalletPanel = () => {
-  const [balance, setBalance] = useState(500);
+  const { walletBalance, updateWalletBalance, addTransaction, transactions } = useApp();
   const [selectedAmount, setSelectedAmount] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<string>('');
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [isAddingFunds, setIsAddingFunds] = useState(false);
-
-  const transactions = [
-    { id: 1, type: 'Recharge', amount: 100, date: '2024-03-10' },
-    { id: 2, type: 'Purchase', amount: -50, date: '2024-03-09' },
-  ];
 
   const handleAddFunds = () => {
     setIsAddingFunds(true);
@@ -42,15 +38,24 @@ const WalletPanel = () => {
       toast.error('Please select an amount');
       return;
     }
-    // Simulate payment processing
+    
     toast.loading('Processing payment...');
     setTimeout(() => {
-      setBalance(prev => prev + Number(selectedAmount));
+      const amount = Number(selectedAmount);
+      updateWalletBalance(amount);
+      addTransaction({
+        type: 'recharge',
+        amount: amount,
+        description: `Wallet recharge via ${paymentMethod}`
+      });
+      
+      console.log('Wallet balance updated after recharge:', walletBalance + amount);
+      
       setIsAddingFunds(false);
       setSelectedAmount('');
       setPaymentMethod('');
       setShowPaymentDetails(false);
-      toast.success(`Successfully added $${selectedAmount} to wallet`);
+      toast.success(`Successfully added $${amount} to wallet`);
     }, 2000);
   };
 
@@ -62,7 +67,7 @@ const WalletPanel = () => {
           <Wallet className="w-6 h-6 text-primary" />
           <h3 className="text-xl font-semibold">Wallet Balance</h3>
         </div>
-        <p className="text-3xl font-bold">${balance.toFixed(2)}</p>
+        <p className="text-3xl font-bold">${walletBalance.toFixed(2)}</p>
       </div>
 
       {/* Add Funds Section */}
@@ -123,11 +128,11 @@ const WalletPanel = () => {
                 className="flex items-center justify-between p-4 bg-white/50 backdrop-blur-sm rounded-lg border border-white/20"
               >
                 <div>
-                  <p className="font-medium">{tx.type}</p>
-                  <p className="text-sm text-gray-500">{tx.date}</p>
+                  <p className="font-medium">{tx.type === 'recharge' ? 'Recharge' : 'Purchase'}</p>
+                  <p className="text-sm text-gray-500">{new Date(tx.date).toLocaleDateString()}</p>
                 </div>
-                <span className={`font-medium ${tx.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {tx.amount > 0 ? '+' : ''}{tx.amount}
+                <span className={`font-medium ${tx.type === 'recharge' ? 'text-green-500' : 'text-red-500'}`}>
+                  {tx.type === 'recharge' ? '+' : '-'}${Math.abs(tx.amount).toFixed(2)}
                 </span>
               </div>
             ))}
