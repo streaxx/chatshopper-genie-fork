@@ -20,9 +20,9 @@ interface ProductListProps {
 const ProductList = ({ products, onSelectProduct, onBuyProduct }: ProductListProps) => {
   return (
     <div className="w-full -mx-4 px-4 py-2">
-      <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide min-w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
         {products.map((product) => (
-          <div key={product.id} className="snap-start flex-none w-72 first:ml-0 last:mr-0">
+          <div key={product.id} className="w-full">
             <ProductCard
               image={product.image}
               name={product.name}

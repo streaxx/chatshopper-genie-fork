@@ -28,7 +28,42 @@ const sampleProducts = [
     description: "High-performance laptop with the latest tech specs.",
     availability: 'in-stock' as const
   },
-  // Additional sample products can be added here
+  {
+    id: 2,
+    name: "MacBook Pro",
+    price: 1299.99,
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
+    description: "Professional-grade laptop for creative work.",
+    availability: 'in-stock' as const
+  },
+  {
+    id: 3,
+    name: "Ultrabook Slim",
+    price: 899.99,
+    rating: 4.3,
+    image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1",
+    description: "Ultra-thin and lightweight laptop for mobility.",
+    availability: 'low-stock' as const
+  },
+  {
+    id: 4,
+    name: "Developer Laptop",
+    price: 1499.99,
+    rating: 4.7,
+    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
+    description: "Powerful laptop optimized for coding and development.",
+    availability: 'in-stock' as const
+  },
+  {
+    id: 5,
+    name: "Business Laptop",
+    price: 1099.99,
+    rating: 4.4,
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
+    description: "Reliable laptop for business professionals.",
+    availability: 'in-stock' as const
+  }
 ];
 
 interface MenuItem {
