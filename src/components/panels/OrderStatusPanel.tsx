@@ -1,42 +1,13 @@
 import React, { useState } from 'react';
 import { Package, Truck, CheckCircle, XCircle, RefreshCcw, ChevronDown } from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
 
 type OrderStatus = 'all' | 'arriving' | 'cancelled' | 'refunded';
 
 const OrderStatusPanel = () => {
+  const { orders } = useApp();
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus>('all');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-
-  const orders = [
-    {
-      id: 'ORD001',
-      product: 'Premium Laptop',
-      date: '2024-03-10',
-      status: 'arriving',
-      trackingId: 'TRK123456',
-      deliveryDate: '2024-03-15',
-      trackingStatus: [
-        { date: '2024-03-10', status: 'Order Placed' },
-        { date: '2024-03-11', status: 'Shipped' },
-        { date: '2024-03-12', status: 'In Transit' }
-      ]
-    },
-    {
-      id: 'ORD002',
-      product: 'Wireless Headphones',
-      date: '2024-03-09',
-      status: 'cancelled',
-      trackingId: 'TRK123457'
-    },
-    {
-      id: 'ORD003',
-      product: 'Smart Watch',
-      date: '2024-03-08',
-      status: 'refunded',
-      trackingId: 'TRK123458',
-      refundDate: '2024-03-09'
-    }
-  ];
 
   const getStatusIcon = (status: string) => {
     switch (status) {

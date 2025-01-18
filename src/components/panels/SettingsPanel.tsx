@@ -1,25 +1,35 @@
 import React from 'react';
 import { User, MapPin, Mail, Key, ArrowLeft } from 'lucide-react';
 import { Separator } from '../ui/separator';
+import { useApp } from '@/contexts/AppContext';
+import AddressForm from '../AddressForm';
 
 interface SettingsPanelProps {
   onBack?: () => void;
 }
 
 const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
+  const { addresses } = useApp();
+  const [showAddressForm, setShowAddressForm] = React.useState(false);
   const userDetails = {
     id: "USER123",
-    email: "user@example.com",
-    addresses: [
-      {
-        name: "Home",
-        street: "123 Main St",
-        city: "San Francisco",
-        state: "CA",
-        zipCode: "94105"
-      }
-    ]
+    email: "user@example.com"
   };
+
+  if (showAddressForm) {
+    return (
+      <div className="space-y-4">
+        <button
+          onClick={() => setShowAddressForm(false)}
+          className="flex items-center gap-2 text-primary"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Settings
+        </button>
+        <AddressForm onComplete={() => setShowAddressForm(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -55,8 +65,8 @@ const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
 
       <div className="space-y-2">
         <h3 className="font-medium">Saved Addresses</h3>
-        {userDetails.addresses.map((address, index) => (
-          <div key={index} className="flex items-start gap-3 p-4 bg-white/50 rounded-xl">
+        {addresses.map((address) => (
+          <div key={address.id} className="flex items-start gap-3 p-4 bg-white/50 rounded-xl">
             <MapPin className="w-5 h-5 text-primary mt-1" />
             <div>
               <div className="font-medium">{address.name}</div>
@@ -66,7 +76,10 @@ const SettingsPanel = ({ onBack }: SettingsPanelProps) => {
             </div>
           </div>
         ))}
-        <button className="w-full flex items-center gap-3 p-4 bg-white/50 rounded-xl hover:bg-white/70 transition-colors text-primary">
+        <button 
+          onClick={() => setShowAddressForm(true)}
+          className="w-full flex items-center gap-3 p-4 bg-white/50 rounded-xl hover:bg-white/70 transition-colors text-primary"
+        >
           <MapPin className="w-5 h-5" />
           Add New Address
         </button>

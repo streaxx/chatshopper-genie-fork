@@ -16,6 +16,7 @@ import WalletBalance from './WalletBalance';
 import WalletPanel from './panels/WalletPanel';
 import AddressSelector from './AddressSelector';
 import SettingsPanel from './panels/SettingsPanel';
+import { useApp } from '@/contexts/AppContext';
 
 const sampleProducts = [
   {
@@ -38,6 +39,7 @@ interface MenuItem {
 }
 
 const ChatInterface = () => {
+  const { updateWalletBalance, addTransaction, addOrder } = useApp();
   const [message, setMessage] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -88,6 +90,29 @@ const ChatInterface = () => {
   const handleBuy = (product: any) => {
     setProcessingOrder(product);
     const timestamp = Date.now();
+    
+    // Add to orders
+    addOrder({
+      product: product.name,
+      status: 'arriving',
+      trackingId: `TRK${Math.random().toString(36).substr(2, 9)}`,
+      amount: product.price,
+      deliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+      trackingStatus: [
+        { date: new Date().toISOString(), status: 'Order Placed' }
+      ]
+    });
+
+    // Add transaction
+    addTransaction({
+      type: 'expense',
+      amount: -product.price,
+      description: `Purchase: ${product.name}`
+    });
+
+    // Update wallet balance
+    updateWalletBalance(-product.price);
+
     setMessages(prev => [...prev, {
       isUser: false,
       content: (
@@ -95,7 +120,6 @@ const ChatInterface = () => {
           product={product}
           onComplete={() => {
             setProcessingOrder(null);
-            setWalletBalance(prev => prev - product.price);
             toast.success('Order completed successfully!');
           }}
         />
