@@ -39,7 +39,8 @@ const WalletPanel = () => {
       return;
     }
     
-    toast.loading('Processing payment...');
+    const toastId = toast.loading('Processing payment...');
+    
     setTimeout(() => {
       const amount = Number(selectedAmount);
       updateWalletBalance(amount);
@@ -55,6 +56,8 @@ const WalletPanel = () => {
       setSelectedAmount('');
       setPaymentMethod('');
       setShowPaymentDetails(false);
+      
+      toast.dismiss(toastId);
       toast.success(`Successfully added $${amount} to wallet`);
     }, 2000);
   };
