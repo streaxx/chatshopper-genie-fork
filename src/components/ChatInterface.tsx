@@ -229,6 +229,7 @@ const ChatInterface = () => {
       // Check for product-related keywords
       if (/\b(buy|get|purchase|Buy|Get|Purchase)\b/i.test(responseText)) {
         const msg = JSON.parse(responseText);
+        console.log('dummy')
         toast.success("This product is not available yet, but here are some products you might like!");
 
         setMessages((prev: any) => [
