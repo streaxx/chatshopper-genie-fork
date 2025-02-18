@@ -2,13 +2,15 @@ import React from 'react';
 import ProductCard from './ProductCard';
 
 interface Product {
-  id: number;
-  name: string;
-  price: number;
-  rating: number;
-  image: string;
-  description: string;
-  availability: 'in-stock' | 'low-stock' | 'out-of-stock';
+  id?: number;
+  name?: string;
+  price?: number;
+  rating?: number;
+  image?: string;
+  description?: string;
+  availability?: 'in-stock' | 'low-stock' | 'out-of-stock';
+  type: "sample"| "exa"
+  url: string
 }
 
 interface ProductListProps {
@@ -25,8 +27,10 @@ const ProductList = ({ products, onSelectProduct, onBuyProduct }: ProductListPro
           <div key={product.id} className="w-full">
             <ProductCard
               image={product.image}
+              url={product.url}
               name={product.name}
               price={product.price}
+              type={product.type}
               rating={product.rating}
               description={product.description}
               availability={product.availability}

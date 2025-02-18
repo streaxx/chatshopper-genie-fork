@@ -30,52 +30,26 @@ import WalletBalance from "./WalletBalance";
 import WalletPanel from "./panels/WalletPanel";
 import AddressSelector from "./AddressSelector";
 import { useApp } from "@/contexts/AppContext";
+import Exa from "exa-js";
 
 const sampleProducts = [
   {
     id: 1,
     name: "Premium Laptop",
     price: 999.99,
+    type: "sample",
     rating: 4.5,
     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
     description: "High-performance laptop with the latest tech specs.",
-    availability: "in-stock" as const,
   },
   {
     id: 2,
     name: "MacBook Pro",
     price: 1299.99,
+    type: "sample",
     rating: 4.8,
     image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
     description: "Professional-grade laptop for creative work.",
-    availability: "in-stock" as const,
-  },
-  {
-    id: 3,
-    name: "Ultrabook Slim",
-    price: 899.99,
-    rating: 4.3,
-    image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1",
-    description: "Ultra-thin and lightweight laptop for mobility.",
-    availability: "low-stock" as const,
-  },
-  {
-    id: 4,
-    name: "Developer Laptop",
-    price: 1499.99,
-    rating: 4.7,
-    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
-    description: "Powerful laptop optimized for coding and development.",
-    availability: "in-stock" as const,
-  },
-  {
-    id: 5,
-    name: "Business Laptop",
-    price: 1099.99,
-    rating: 4.4,
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
-    description: "Reliable laptop for business professionals.",
-    availability: "in-stock" as const,
   },
 ];
 
@@ -86,7 +60,7 @@ interface MenuItem {
   position?: "top" | "bottom";
 }
 
-const endpoint = "https://api.10dollarjob.com/api/chat";
+const endpoint = import.meta.env.VITE_PUBLIC_ENDPOINT;
 
 const ChatInterface = () => {
   const { walletBalance, updateWalletBalance, addTransaction, addOrder } =
@@ -165,26 +139,18 @@ const ChatInterface = () => {
     setMessages((prev) => [...prev, message]);
   };
 
-  const handleProductSearch = async (inputText: string) => {
-    if (inputText.toLowerCase().includes("buy")) {
-      toast.success("Here are some products you might like!");
-      await appendMessage({
-        role: "assistant",
-        content: "",
-        id: Date.now().toString(),
-        ui: (
-          <ProductList
-            products={sampleProducts}
-            onSelectProduct={setSelectedProduct}
-            onBuyProduct={handleBuy}
-          />
-        ),
-      });
-    }
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
+  };
+
+  const transformExaResults = (exaResults: any[]) => {
+    return exaResults.map((result, index) => ({
+      id: index + sampleProducts.length + 1,
+      name: result.title,
+      type: "exa",
+      image: result.image,  
+      url: result.url
+    }));
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -198,9 +164,6 @@ const ChatInterface = () => {
       id: Date.now().toString(),
     };
     setMessages((prev) => [...prev, userMessage]);
-
-    // Handle product search first
-    await handleProductSearch(input);
 
     // Start loading state
     setIsLoading(true);
@@ -228,17 +191,28 @@ const ChatInterface = () => {
 
       // Check for product-related keywords
       if (/\b(buy|get|purchase|Buy|Get|Purchase)\b/i.test(responseText)) {
-        const msg = JSON.parse(responseText);
-        console.log('dummy')
-        toast.success("This product is not available yet, but here are some products you might like!");
+        const exa = new Exa(import.meta.env.VITE_PUBLIC_KEY);
+        const result = await exa.searchAndContents(`product pages of with images ${responseText}`, {
+          text: true,
+          numResults: 4
+        });
+        //@ts-ignore
+        
+        const exaProducts = transformExaResults(result?.results);
+        const combinedProducts = [...sampleProducts, ...exaProducts];
+        toast.success(
+          "This product is not available yet, but here are some products you might like!",
+        );
 
+        console.log(sampleProducts);
         setMessages((prev: any) => [
           ...prev,
           {
             role: "assistant" as const,
             content: (
               <ProductList
-                products={sampleProducts}
+                //@ts-ignore
+                products={combinedProducts}
                 onSelectProduct={setSelectedProduct}
                 onBuyProduct={handleBuy}
               />
@@ -264,10 +238,13 @@ const ChatInterface = () => {
     }
   };
 
-  console.log(messages);
   const handleBuy = async (product: any) => {
     setProcessingOrder(product);
 
+    if(walletBalance <= 0) {
+      toast.error("You don't have enough funds in your wallet")
+      return
+    }
     // Add to orders
     addOrder({
       product: product.name,
