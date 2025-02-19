@@ -148,8 +148,8 @@ const ChatInterface = () => {
       id: index + sampleProducts.length + 1,
       name: result.title,
       type: "exa",
-      image: result.image,  
-      url: result.url
+      image: result.image,
+      url: result.url,
     }));
   };
 
@@ -191,13 +191,23 @@ const ChatInterface = () => {
 
       // Check for product-related keywords
       if (/\b(buy|get|purchase|Buy|Get|Purchase)\b/i.test(responseText)) {
-        const exa = new Exa(import.meta.env.VITE_PUBLIC_KEY);
-        const result = await exa.searchAndContents(`product pages of with images ${responseText}`, {
-          text: true,
-          numResults: 4
+        const query = `product pages of with images ${responseText}`;
+        const response = await fetch("https://api.exa.ai/search", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_PUBLIC_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query,
+            text: true,
+            numResults: 4,
+          }),
         });
+
+        const result = await response.json();
         //@ts-ignore
-        
+
         const exaProducts = transformExaResults(result?.results);
         const combinedProducts = [...sampleProducts, ...exaProducts];
         toast.success(
@@ -241,9 +251,9 @@ const ChatInterface = () => {
   const handleBuy = async (product: any) => {
     setProcessingOrder(product);
 
-    if(walletBalance <= 0) {
-      toast.error("You don't have enough funds in your wallet")
-      return
+    if (walletBalance <= 0) {
+      toast.error("You don't have enough funds in your wallet");
+      return;
     }
     // Add to orders
     addOrder({
