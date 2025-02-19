@@ -189,21 +189,18 @@ const ChatInterface = () => {
 
       const responseText = result?.data.response;
 
-      // Check for product-related keywords
       if (/\b(buy|get|purchase|Buy|Get|Purchase)\b/i.test(responseText)) {
-        const query = `product pages of with images ${responseText}`;
-        const response = await fetch("https://api.exa.ai/search", {
-          method: "POST",
+        const response = await fetch(import.meta.env.VITE_PUBLIC_PROXY_URL+'/api/search', {
+          method: 'POST',
           headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_PUBLIC_KEY}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            query,
+            query: `product pages of with images ${responseText}`,
             text: true,
             numResults: 4,
           }),
-        });
+        })
 
         const result = await response.json();
         //@ts-ignore
