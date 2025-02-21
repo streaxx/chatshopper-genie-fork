@@ -144,11 +144,13 @@ const ChatInterface = () => {
   };
 
   const transformExaResults = (exaResults: any[]) => {
+    console.log(exaResults)
     return exaResults.map((result, index) => ({
       id: index + sampleProducts.length + 1,
       name: result.title,
+      price: result.price,
       type: "exa",
-      image: result.image,
+      image: result.img,
       url: result.url,
     }));
   };
@@ -205,7 +207,7 @@ const ChatInterface = () => {
         const result = await response.json();
         //@ts-ignore
 
-        const exaProducts = transformExaResults(result?.results);
+        const exaProducts = transformExaResults(result);
         const combinedProducts = [...sampleProducts, ...exaProducts];
         toast.success(
           "This product is not available yet, but here are some products you might like!",
