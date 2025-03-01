@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import axios from "axios";
 import {
   Send,
@@ -73,6 +73,7 @@ const ChatInterface = () => {
     Record<string, any>
   >({});
 
+  const buyProcess = useRef(null);
   const [messages, setMessages] = useState<
     Array<{
       role: "user" | "assistant";
@@ -144,7 +145,7 @@ const ChatInterface = () => {
   };
 
   const transformExaResults = (exaResults: any[]) => {
-    console.log(exaResults)
+    console.log(exaResults);
     return exaResults.map((result, index) => ({
       id: index + sampleProducts.length + 1,
       name: result.title,
@@ -192,17 +193,20 @@ const ChatInterface = () => {
       const responseText = result?.data.response;
 
       if (/\b(buy|get|purchase|Buy|Get|Purchase)\b/i.test(responseText)) {
-        const response = await fetch(import.meta.env.VITE_PUBLIC_PROXY_URL+'/api/search', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          import.meta.env.VITE_PUBLIC_PROXY_URL + "/api/search",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query: `product pages of with images ${responseText}`,
+              text: true,
+              numResults: 4,
+            }),
           },
-          body: JSON.stringify({
-            query: `product pages of with images ${responseText}`,
-            text: true,
-            numResults: 4,
-          }),
-        })
+        );
 
         const result = await response.json();
         //@ts-ignore
@@ -250,15 +254,16 @@ const ChatInterface = () => {
   const handleBuy = async (product: any) => {
     setProcessingOrder(product);
 
-    if (walletBalance <= 0) {
+    if (walletBalance < product.price) {
       toast.error("You don't have enough funds in your wallet");
       return;
     }
+
     // Add to orders
     addOrder({
       product: product.name,
       status: "arriving",
-      trackingId: `TRK${Math.random().toString(36).substr(2, 9)}`,
+      trackingId: `TRK${Math.random().toString(36).slice(2, 11)}`,
       amount: product.price,
       deliveryDate: new Date(
         Date.now() + 5 * 24 * 60 * 60 * 1000,
@@ -292,6 +297,8 @@ const ChatInterface = () => {
         />
       ),
     });
+
+    buyProcess.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleWalletClick = () => {
@@ -408,21 +415,25 @@ const ChatInterface = () => {
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent via-white/10 to-white/20 backdrop-blur-sm">
         {messages.map((message) => (
-          <ChatMessage key={message.id} isUser={message.role === "user"}>
-            {message.ui || message.content}
-          </ChatMessage>
+          <>
+            <ChatMessage key={message.id} isUser={message.role === "user"}>
+              {message.ui || message.content}
+            </ChatMessage>
+            <div className="mt-10" ref={buyProcess}></div>
+          </>
         ))}
         {isLoading && (
-          <ChatMessage isUser={false}>
-            <div className="flex space-x-2">
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
-            </div>
-          </ChatMessage>
+          <>
+            <ChatMessage isUser={false}>
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+              </div>
+            </ChatMessage>
+          </>
         )}
       </div>
-
       {/* Input Area */}
       <form
         onSubmit={handleSendMessage}
@@ -456,15 +467,6 @@ const ChatInterface = () => {
           </button>
         </div>
       </form>
-
-      {/* Product Overlay */}
-      {selectedProduct && (
-        <ProductOverlay
-          product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          onBuy={() => handleBuy(selectedProduct)}
-        />
-      )}
     </div>
   );
 };
